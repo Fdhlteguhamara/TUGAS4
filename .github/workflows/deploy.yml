@@ -1,24 +1,25 @@
 name: CI/CD CRUD Kesehatan
 on:
   push:
-    [cite_start]branches: [main] # Memicu otomatis saat push ke main [cite: 44, 47]
+    [cite_start]branches: [main] # Memicu otomatis saat ada push ke branch main [cite: 44, 47]
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Code
-        [cite_start]uses: actions/checkout@v2 [cite: 52, 53]
+        [cite_start]uses: actions/checkout@v2 [cite: 53]
 
       - name: Setup SSH
-        uses: webfactory/ssh-agent@v0.5.3
+        [cite_start]uses: webfactory/ssh-agent@v0.5.3 [cite: 55]
         with:
           [cite_start]ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }} [cite: 57, 127]
 
       - name: Deploy ke EC2
         run: |
-          ssh -o StrictHostKeyChecking=no ubuntu@IP_EC2 << 'EOF'
-            cd /var/www/TUGAS4
-            git pull origin main
-            sudo systemctl restart nginx
+          [cite: 60, 216]
+          ssh -o StrictHostKeyChecking=no ubuntu@108.136.125.120 << 'EOF'
+            cd /var/www/TUGAS4 [cite: 61, 209]
+            git pull origin main [cite: 62]
+            sudo systemctl restart nginx [cite: 63, 207]
           EOF
