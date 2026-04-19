@@ -3,46 +3,235 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistem Data Pasien - Klinik Sehat</title>
+    <title>Sistem Manajemen Pasien | Klinik Sehat</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { font-family: sans-serif; margin: 20px; background-color: #f4f7f6; }
-        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
-        h2 { color: #2c3e50; text-align: center; }
-        form { display: flex; flex-direction: column; gap: 10px; margin-bottom: 30px; }
-        input, button { padding: 10px; border-radius: 4px; border: 1px solid #ddd; }
-        button { cursor: pointer; background-color: #27ae60; color: white; border: none; font-weight: bold; }
-        button:hover { background-color: #219150; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #f8f9fa; }
-        .btn-delete { background-color: #e74c3c; padding: 5px 10px; font-size: 12px; }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        .glass { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); }
     </style>
 </head>
-<body>
+<body class="bg-slate-50 min-h-screen pb-12">
 
-<div class="container">
-    <h2>Manajemen Data Pasien</h2>
-    
-    <form id="patientForm">
-        <input type="text" id="nama" placeholder="Nama Lengkap" required>
-        <input type="number" id="umur" placeholder="Umur" required>
-        <input type="text" id="diagnosa" placeholder="Diagnosa" required>
-        <button type="submit">Tambah Pasien</button>
-    </form>
+    <!-- Header / Navbar -->
+    <nav class="bg-blue-600 shadow-lg mb-8">
+        <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center text-white">
+            <div class="flex items-center space-gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.628.283a2 2 0 01-1.131.21l-3.983-.58a2 2 0 01-1.447-1.494L4 5h5a2 2 0 002 2h2a2 2 0 002-2h5l-1.572 7.86a2 2 0 01-1.022 1.568v0z" />
+                </svg>
+                <span class="font-bold text-xl tracking-tight uppercase">Klinik Sehat CI/CD</span>
+            </div>
+            <div class="text-sm opacity-80" id="currentDate"></div>
+        </div>
+    </nav>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Nama</th>
-                <th>Umur</th>
-                <th>Diagnosa</th>
-                <th>Aksi</th>
-            </tr>
-        </thead>
-        <tbody id="patientTableBody"></tbody>
-    </table>
-</div>
+    <div class="max-w-6xl mx-auto px-4">
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            
+            <!-- Panel Form -->
+            <div class="lg:col-span-1">
+                <div class="glass p-6 rounded-2xl shadow-sm border border-slate-200">
+                    <h3 class="text-lg font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <span id="formTitle">Registrasi Pasien Baru</span>
+                    </h3>
+                    
+                    <form id="patientForm" class="space-y-4">
+                        <input type="hidden" id="editIndex" value="-1">
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Nama Lengkap</label>
+                            <input type="text" id="nama" required class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" placeholder="Contoh: Budi Santoso">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Umur (Tahun)</label>
+                            <input type="number" id="umur" required class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" placeholder="Contoh: 25">
+                        </div>
+                        
+                        <div>
+                            <label class="block text-sm font-medium text-slate-600 mb-1">Diagnosa</label>
+                            <textarea id="diagnosa" required rows="3" class="w-full px-4 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition" placeholder="Deskripsi keluhan atau diagnosa medis..."></textarea>
+                        </div>
+                        
+                        <div class="flex gap-2 pt-2">
+                            <button type="submit" id="submitBtn" class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 rounded-lg transition transform active:scale-95 shadow-md">
+                                Simpan Data
+                            </button>
+                            <button type="button" id="cancelBtn" class="hidden flex-1 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium py-2 rounded-lg transition">
+                                Batal
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                
+                <!-- Feedback Message -->
+                <div id="msgBox" class="mt-4 hidden p-4 rounded-lg text-sm font-medium"></div>
+            </div>
 
-<script src="script.js"></script>
+            <!-- Panel Tabel -->
+            <div class="lg:col-span-2">
+                <div class="glass p-6 rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+                        <h3 class="text-lg font-semibold text-slate-800">Daftar Pasien Aktif</h3>
+                        <div class="relative w-full md:w-64">
+                            <input type="text" id="searchBar" placeholder="Cari pasien..." class="w-full pl-10 pr-4 py-2 rounded-full border border-slate-300 text-sm focus:ring-2 focus:ring-blue-500 outline-none">
+                            <svg class="w-4 h-4 absolute left-3 top-2.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-separate border-spacing-y-2">
+                            <thead>
+                                <tr class="text-slate-500 text-sm uppercase tracking-wider">
+                                    <th class="px-4 py-2">Nama</th>
+                                    <th class="px-4 py-2">Umur</th>
+                                    <th class="px-4 py-2">Diagnosa</th>
+                                    <th class="px-4 py-2 text-right">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="patientTableBody" class="text-slate-700">
+                                <!-- Data akan muncul di sini -->
+                            </tbody>
+                        </table>
+                        <div id="emptyState" class="hidden flex flex-col items-center py-12 text-slate-400">
+                            <svg class="w-16 h-16 mb-2 opacity-20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"></path></svg>
+                            <p>Belum ada data pasien yang terdaftar.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const patientForm = document.getElementById('patientForm');
+        const patientTableBody = document.getElementById('patientTableBody');
+        const submitBtn = document.getElementById('submitBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const formTitle = document.getElementById('formTitle');
+        const editIndexInput = document.getElementById('editIndex');
+        const msgBox = document.getElementById('msgBox');
+        const emptyState = document.getElementById('emptyState');
+        const searchBar = document.getElementById('searchBar');
+
+        // Menampilkan Tanggal
+        document.getElementById('currentDate').innerText = new Intl.DateTimeFormat('id-ID', { dateStyle: 'full' }).format(new Date());
+
+        // Load Data
+        function loadPatients(filter = '') {
+            const patients = JSON.parse(localStorage.getItem('patients')) || [];
+            const filteredPatients = patients.filter(p => p.nama.toLowerCase().includes(filter.toLowerCase()));
+            
+            patientTableBody.innerHTML = '';
+            
+            if (filteredPatients.length === 0) {
+                emptyState.classList.remove('hidden');
+            } else {
+                emptyState.classList.add('hidden');
+                filteredPatients.forEach((patient, index) => {
+                    const row = `
+                        <tr class="bg-white shadow-sm rounded-lg hover:shadow-md transition cursor-default">
+                            <td class="px-4 py-4 font-medium text-slate-800 rounded-l-lg border-y border-l border-slate-100">${patient.nama}</td>
+                            <td class="px-4 py-4 text-slate-600 border-y border-slate-100">${patient.umur} Thn</td>
+                            <td class="px-4 py-4 text-slate-500 max-w-xs truncate border-y border-slate-100">${patient.diagnosa}</td>
+                            <td class="px-4 py-4 text-right rounded-r-lg border-y border-r border-slate-100">
+                                <button onclick="editPatient(${index})" class="text-blue-600 hover:text-blue-800 p-1 mr-2 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                </button>
+                                <button onclick="deletePatient(${index})" class="text-red-600 hover:text-red-800 p-1 transition">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </td>
+                        </tr>
+                    `;
+                    patientTableBody.insertAdjacentHTML('beforeend', row);
+                });
+            }
+        }
+
+        // Show Message
+        function showMsg(text, type = 'success') {
+            msgBox.innerText = text;
+            msgBox.className = `mt-4 p-4 rounded-lg text-sm font-medium ${type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`;
+            msgBox.classList.remove('hidden');
+            setTimeout(() => msgBox.classList.add('hidden'), 3000);
+        }
+
+        // Create / Update Logic
+        patientForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const index = parseInt(editIndexInput.value);
+            const data = {
+                nama: document.getElementById('nama').value,
+                umur: document.getElementById('umur').value,
+                diagnosa: document.getElementById('diagnosa').value
+            };
+
+            const patients = JSON.parse(localStorage.getItem('patients')) || [];
+
+            if (index === -1) {
+                // Add New
+                patients.push(data);
+                showMsg("Data pasien berhasil ditambahkan!");
+            } else {
+                // Update Existing
+                patients[index] = data;
+                showMsg("Perubahan berhasil disimpan!");
+                resetForm();
+            }
+
+            localStorage.setItem('patients', JSON.stringify(patients));
+            patientForm.reset();
+            loadPatients();
+        });
+
+        // Edit Function
+        window.editPatient = function(index) {
+            const patients = JSON.parse(localStorage.getItem('patients'));
+            const p = patients[index];
+            
+            document.getElementById('nama').value = p.nama;
+            document.getElementById('umur').value = p.umur;
+            document.getElementById('diagnosa').value = p.diagnosa;
+            
+            editIndexInput.value = index;
+            formTitle.innerText = "Edit Data Pasien";
+            submitBtn.innerText = "Simpan Perubahan";
+            cancelBtn.classList.remove('hidden');
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        };
+
+        // Delete Function
+        window.deletePatient = function(index) {
+            if (confirm("Apakah Anda yakin ingin menghapus data pasien ini?")) {
+                const patients = JSON.parse(localStorage.getItem('patients'));
+                patients.splice(index, 1);
+                localStorage.setItem('patients', JSON.stringify(patients));
+                showMsg("Data telah dihapus.", "error");
+                loadPatients();
+            }
+        };
+
+        // Search Logic
+        searchBar.addEventListener('input', (e) => {
+            loadPatients(e.target.value);
+        });
+
+        // Cancel Edit
+        function resetForm() {
+            editIndexInput.value = -1;
+            formTitle.innerText = "Registrasi Pasien Baru";
+            submitBtn.innerText = "Simpan Data";
+            cancelBtn.classList.add('hidden');
+            patientForm.reset();
+        }
+        
+        cancelBtn.addEventListener('click', resetForm);
+
+        // Initial Load
+        loadPatients();
+    </script>
 </body>
 </html>
